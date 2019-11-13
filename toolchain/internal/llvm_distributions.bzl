@@ -85,6 +85,8 @@ _llvm_distributions = {
     "clang+llvm-9.0.0-i386-unknown-freebsd11.tar.xz": "2d8d0b712946d6bc76317c4093ce77634ef6d502c343e1f3f6b841401db8fa56",
     "clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz": "a23b082b30c128c9831dbdd96edad26b43f56624d0ad0ea9edec506f5385038d",
     "clang+llvm-9.0.0-x86_64-darwin-apple.tar.xz": "b46e3fe3829d4eb30ad72993bf28c76b1e1f7e38509fbd44192a2ef7c0126fc7",
+    "LLVM-9.0.0-win64.exe": "71ed99a6720945d76b6772584735f2ed472f12719dff184a0b1a6a35047b8863",
+    "LLVM-9.0.0-win32.exe": "089e226dc0d3ecb292f344cdbed96c5d9a705564cc578957a955b4ed71c70cae",
 }
 
 def _python(rctx):
@@ -132,11 +134,23 @@ def download_llvm_preconfigured(rctx):
         for base in url_base
     ]
 
-    rctx.download_and_extract(
-        urls,
-        sha256 = _llvm_distributions[basename],
-        stripPrefix = basename[:(len(basename) - len(".tar.xz"))],
-    )
+    if(basename.endswith(".exe")):
+        rctx.download(
+            urls,
+            sha256 = _llvm_distributions[basename],
+            output = basename,
+        )
+        extractResult = rctx.execute([
+            rctx.path(rctx.attr._7zip_windows),
+            "x",
+            ".",
+        ])
+    else:
+        rctx.download_and_extract(
+            urls,
+            sha256 = _llvm_distributions[basename],
+            stripPrefix = basename[:(len(basename) - len(".tar.xz"))],
+        )
 
 # Download LLVM from the user-provided URLs and return True. If URLs were not provided, return
 # False.
@@ -149,6 +163,10 @@ def download_llvm(rctx):
         urls = rctx.attr.urls.get("darwin", default = [])
         sha256 = rctx.attr.sha256.get("darwin", default = "")
         prefix = rctx.attr.strip_prefix.get("darwin", default = "")
+    elif rctx.os.name.startswith("windows"):
+        urls = rctx.attr.urls.get("win64", default = [])
+        sha256 = rctx.attr.sha256.get("win64", default = "")
+        prefix = rctx.attr.strip_prefix.get("win64", default = "")
     else:
         fail("Unsupported OS: " + rctx.os.name)
 

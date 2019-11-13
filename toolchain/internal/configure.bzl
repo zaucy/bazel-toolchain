@@ -45,6 +45,7 @@ def llvm_toolchain_impl(rctx):
 
     sysroot_path, sysroot = _sysroot_path(rctx)
     substitutions = {
+        "%{exe}": ".exe" if rctx.os.name.startswith("windows") else "",
         "%{repo_name}": rctx.name,
         "%{llvm_version}": rctx.attr.llvm_version,
         "%{toolchain_path_prefix}": toolchain_path_prefix,
@@ -85,26 +86,24 @@ def llvm_toolchain_impl(rctx):
         substitutions,
     )
 
-    rctx.symlink("/usr/bin/ar", "bin/ar")  # For GoLink.
+    if not rctx.os.name.startswith("windows"):
+        rctx.symlink("/usr/bin/ar", "bin/ar")  # For GoLink.
 
-    # For GoCompile on macOS; compiler path is set from linker path.
-    # It also helps clang driver sometimes for the linker to be colocated with the compiler.
-    rctx.symlink("/usr/bin/ld", "bin/ld")
-    if rctx.os.name == "linux":
-        rctx.symlink("/usr/bin/ld.gold", "bin/ld.gold")
-    else:
-        # Add dummy file for non-linux so we don't have to put conditional logic in BUILD.
-        rctx.file("bin/ld.gold")
+        # For GoCompile on macOS; compiler path is set from linker path.
+        # It also helps clang driver sometimes for the linker to be colocated with the compiler.
+        rctx.symlink("/usr/bin/ld", "bin/ld")
+        if rctx.os.name == "linux":
+            rctx.symlink("/usr/bin/ld.gold", "bin/ld.gold")
+        else:
+            # Add dummy file for non-linux so we don't have to put conditional logic in BUILD.
+            rctx.file("bin/ld.gold")
 
     # Repository implementation functions can be restarted, keep expensive ops at the end.
     if not _download_llvm(rctx):
         _download_llvm_preconfigured(rctx)
 
-def conditional_cc_toolchain(name, darwin, absolute_paths = False):
+def conditional_cc_toolchain(name, toolchain_config = None, toolchain_identifier = None, supports_param_files = 0, extra_files = [], absolute_paths = False):
     # Toolchain macro for BUILD file to use conditional logic.
-
-    toolchain_config = "local_darwin" if darwin else "local_linux"
-    toolchain_identifier = "clang-darwin" if darwin else "clang-linux"
 
     if absolute_paths:
         native.cc_toolchain(
@@ -116,10 +115,9 @@ def conditional_cc_toolchain(name, darwin, absolute_paths = False):
             linker_files = ":empty",
             objcopy_files = ":empty",
             strip_files = ":empty",
-            supports_param_files = 0 if darwin else 1,
+            supports_param_files = supports_param_files,
         )
     else:
-        extra_files = [":cc_wrapper"] if darwin else []
         native.filegroup(name = name + "-all-files", srcs = [":all_components"] + extra_files)
         native.filegroup(name = name + "-compiler-files", srcs = [":compiler_components"] + extra_files)
         native.filegroup(name = name + "-linker-files", srcs = [":linker_components"] + extra_files)
@@ -134,5 +132,5 @@ def conditional_cc_toolchain(name, darwin, absolute_paths = False):
             linker_files = name + "-linker-files",
             objcopy_files = ":objcopy",
             strip_files = ":empty",
-            supports_param_files = 0 if darwin else 1,
+            supports_param_files = supports_param_files,
         )

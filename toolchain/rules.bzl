@@ -73,6 +73,10 @@ llvm_toolchain = repository_rule(
             mandatory = False,
             doc = "Path prefix to strip from the extracted files.",
         ),
+        "_7zip_windows": attr.label(
+            default = Label("@7zip//:7z1604-x64/7z.exe"),
+            allow_single_file = True,
+        ),
     },
     local = False,
     implementation = _llvm_toolchain_impl,
