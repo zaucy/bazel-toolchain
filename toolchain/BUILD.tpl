@@ -38,6 +38,7 @@ cc_toolchain_suite(
         "darwin|clang": ":cc-clang-darwin",
         "k8": ":cc-clang-linux",
         "darwin": ":cc-clang-darwin",
+        "x64_windows": ":cc-clang-win64",
     },
 )
 
@@ -51,6 +52,11 @@ cc_toolchain_config(
 cc_toolchain_config(
     name = "local_darwin",
     cpu = "darwin",
+)
+
+cc_toolchain_config(
+    name = "local_win64",
+    cpu = "x64_windows",
 )
 
 toolchain(
@@ -84,11 +90,11 @@ toolchain(
 toolchain(
     name = "cc-toolchain-win64",
     exec_compatible_with = [
-        "@platforms//cpu:x86_64",
+        "@platforms//cpu:x64_windows",
         "@platforms//os:windows",
     ],
     target_compatible_with = [
-        "@platforms//cpu:x86_64",
+        "@platforms//cpu:x64_windows",
         "@platforms//os:windows",
     ],
     toolchain = ":cc-clang-win64",
