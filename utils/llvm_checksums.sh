@@ -58,7 +58,7 @@ github_host() {
   curl -s "https://api.github.com/repos/llvm/llvm-project/releases/tags/llvmorg-${llvm_version}" | \
     jq .assets[].browser_download_url | \
     tee ./urls.txt | \
-    grep 'clang%2Bllvm.*tar.xz"$' | \
+    grep -e 'clang%2Bllvm.*tar.xz"$' -e 'LLVM-.*exe"$' | \
     tee ./filtered_urls.txt | \
     xargs -n1 curl -L -O
   )
@@ -73,7 +73,7 @@ fi
 echo ""
 echo "===="
 echo "Checksums for clang+llvm distributions are:"
-find "${output_dir}" -type f -name '*.xz' -exec shasum -a 256 {} \; | \
+find "${output_dir}" -type f \( -name '*.xz' -o -name '*.exe' \) -exec shasum -a 256 {} \; | \
   sed -e "s@${output_dir}/@@" | \
   awk '{ printf "\"%s\": \"%s\",\n", $2, $1 }' | \
   sed -e 's/%2[Bb]/+/' | \
