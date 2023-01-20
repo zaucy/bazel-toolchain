@@ -265,6 +265,7 @@ _llvm_distributions_base_url = {
     "14.0.0": "https://github.com/llvm/llvm-project/releases/download/llvmorg-",
     "15.0.0": "https://github.com/llvm/llvm-project/releases/download/llvmorg-",
     "15.0.6": "https://github.com/llvm/llvm-project/releases/download/llvmorg-",
+    "15.0.7": "https://github.com/llvm/llvm-project/releases/download/llvmorg-",
 }
 
 def _get_auth(ctx, urls):
