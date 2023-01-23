@@ -24,6 +24,8 @@ load(
     _os = "os",
     _os_arch_pair = "os_arch_pair",
     _os_bzl = "os_bzl",
+    _os_dl_ext = "os_dl_ext",
+    _os_exec_ext = "os_exec_ext",
     _pkg_name_from_label = "pkg_name_from_label",
     _pkg_path_from_label = "pkg_path_from_label",
     _supported_targets = "SUPPORTED_TARGETS",
@@ -51,13 +53,6 @@ def llvm_config_impl(rctx):
     _check_os_arch_keys(rctx.attr.cxx_builtin_include_directories)
 
     os = _os(rctx)
-    if os == "windows":
-        rctx.file("BUILD.bazel")
-        rctx.file("toolchains.bzl", """\
-def llvm_register_toolchains():
-    pass
-""")
-        return
     arch = _arch(rctx)
 
     (key, toolchain_root) = _host_os_arch_dict_value(rctx, "toolchain_roots")
@@ -157,7 +152,8 @@ def llvm_register_toolchains():
         unfiltered_compile_flags_dict = rctx.attr.unfiltered_compile_flags,
         llvm_version = llvm_version,
     )
-    host_dl_ext = "dylib" if os == "darwin" else "so"
+    host_dl_ext = _os_dl_ext(os)
+    host_exec_ext = _os_exec_ext(os)
     host_tools_info = dict([
         pair
         for (key, tool_path, features) in [
@@ -184,6 +180,7 @@ def llvm_register_toolchains():
         llvm_dist_rel_path,
         llvm_dist_label_prefix,
         host_dl_ext,
+        host_exec_ext,
     )
 
     # Convenience macro to register all generated toolchains.
@@ -490,7 +487,7 @@ def _convenience_targets_str(rctx, use_absolute_paths, llvm_dist_rel_path, llvm_
         llvm_dist_label_prefix = ":"
         filenames = []
         for libname in _aliased_libs:
-            filename = "lib/{}.{}".format(libname, host_dl_ext)
+            filename = "lib/{}{}".format(libname, host_dl_ext)
             filenames.append(filename)
         for toolname in _aliased_tools:
             filename = "bin/{}{}".format(toolname, host_exec_ext)
@@ -504,7 +501,7 @@ def _convenience_targets_str(rctx, use_absolute_paths, llvm_dist_rel_path, llvm_
         template = """
 cc_import(
     name = "{name}",
-    shared_library = "{{llvm_dist_label_prefix}}lib/lib{name}.{{host_dl_ext}}",
+    shared_library = "{{llvm_dist_label_prefix}}lib/lib{name}{{host_dl_ext}}",
 )""".format(name = name)
         lib_target_strs.append(template)
 
@@ -513,7 +510,7 @@ cc_import(
         template = """
 native_binary(
     name = "{name}",
-    out = "{name}{host_exec_ext}",
+    out = "{name}{{host_exec_ext}}",
     src = "{{llvm_dist_label_prefix}}bin/{name}{{host_exec_ext}}",
 )""".format(name = name)
         tool_target_strs.append(template)

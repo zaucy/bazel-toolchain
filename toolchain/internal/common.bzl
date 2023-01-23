@@ -108,7 +108,7 @@ def os_exec_ext(os):
 
 def os_dl_ext(os):
     if os == "windows":
-        return ".dl"
+        return ".dll"
     elif os == "darwin":
         return ".dylib"
     elif os == "linux":
