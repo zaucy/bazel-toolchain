@@ -96,6 +96,15 @@ def cc_toolchain_config(
             "clang",
             "glibc_unknown",
         ),
+        "windows-x86_64": (
+            "clang-x86_64-windows",
+            "x86_64-unknown-windows",
+            "windows",
+            "windows",
+            "clang",
+            "clang",
+            "windows",
+        ),
     }[target_os_arch_key]
 
     # Unfiltered compiler flags; these are placed at the end of the command
@@ -279,7 +288,7 @@ def cc_toolchain_config(
     sysroot_prefix = ""
     if sysroot_path:
         sysroot_prefix = "%sysroot%"
-    if target_os == "linux":
+    if target_os == "linux" or target_os == "windows":
         cxx_builtin_include_directories.extend([
             sysroot_prefix + "/include",
             sysroot_prefix + "/usr/include",
