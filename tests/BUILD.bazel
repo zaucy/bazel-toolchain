@@ -123,4 +123,8 @@ sh_test(
         "@llvm_toolchain_llvm//:bin/clang-format",
         "@llvm_toolchain_llvm//:lib",
     ],
+    target_compatible_with = select({
+        "@platforms//os:windows": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
 )

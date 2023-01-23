@@ -482,6 +482,16 @@ cc_toolchain(
         host_tools_info = host_tools_info,
     )
 
+def _alias_shared_lib_str(name = None, shared_library = None, interface_library = None):
+    result = "cc_import(\n"
+    result += "    name = \"{}\",\n".format(name)
+    result += "    shared_library = \"{}\",\n".format(shared_library)
+    if interface_library:
+        result += "    interface_library = \"{}\",\n".format(interface_library)
+    result += ")\n"
+
+    return result
+
 def _convenience_targets_str(rctx, use_absolute_paths, llvm_dist_rel_path, llvm_dist_label_prefix, host_dl_ext, host_exec_ext):
     if use_absolute_paths:
         llvm_dist_label_prefix = ":"
@@ -498,12 +508,17 @@ def _convenience_targets_str(rctx, use_absolute_paths, llvm_dist_rel_path, llvm_
 
     lib_target_strs = []
     for name in _aliased_libs:
-        template = """
-cc_import(
-    name = "{name}",
-    shared_library = "{{llvm_dist_label_prefix}}lib/lib{name}{{host_dl_ext}}",
-)""".format(name = name)
-        lib_target_strs.append(template)
+        if host_dl_ext == ".dll":
+            lib_target_strs.append(_alias_shared_lib_str(
+                name = name,
+                shared_library = "{{llvm_dist_label_prefix}}bin/lib{name}.dll".format(name = name),
+                interface_library = "{{llvm_dist_label_prefix}}lib/lib{name}.lib".format(name = name),
+            ))
+        else:
+            lib_target_strs.append(_alias_shared_lib_str(
+                name = name,
+                shared_library = "{{llvm_dist_label_prefix}}lib/lib{name}{{host_dl_ext}}".format(name = name),
+            ))
 
     tool_target_strs = []
     for name in _aliased_tools:

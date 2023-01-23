@@ -59,3 +59,10 @@ jobs:
       run: wget --no-verbose "https://github.com/llvm/llvm-project/releases/download/${release}/${archive}${ext}" && tar -xf "${archive}${ext}" && mv "${archive}" "${local_path}"
     - name: test
       run: tests/scripts/run_tests.sh -t @llvm_toolchain_with_system_llvm//:cc-toolchain-x86_64-linux
+  windows_test:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: bazel build --extra_toolchains=@llvm_toolchain_windows//:cc-toolchain-x86_64-windows ...
+      working-directory: tests
+
