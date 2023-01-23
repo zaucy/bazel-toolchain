@@ -54,6 +54,8 @@ def llvm_config_impl(rctx):
 
     os = _os(rctx)
     arch = _arch(rctx)
+    host_dl_ext = _os_dl_ext(os)
+    host_exec_ext = _os_exec_ext(os)
 
     (key, toolchain_root) = _host_os_arch_dict_value(rctx, "toolchain_roots")
     if not toolchain_root:
@@ -103,9 +105,9 @@ def llvm_config_impl(rctx):
         wrapper_bin_prefix = "bin/"
         tools_path_prefix = "bin/"
         for tool_name in _toolchain_tools:
-            rctx.symlink(llvm_dist_rel_path + "bin/" + tool_name, tools_path_prefix + tool_name)
+            rctx.symlink(llvm_dist_rel_path + "bin/" + tool_name + host_exec_ext, tools_path_prefix + tool_name + host_exec_ext)
         symlinked_tools_str = "".join([
-            "\n" + (" " * 8) + "\"" + tools_path_prefix + name + "\","
+            "\n" + (" " * 8) + "\"" + tools_path_prefix + name + host_exec_ext + "\","
             for name in _toolchain_tools
         ])
     else:
@@ -152,8 +154,6 @@ def llvm_config_impl(rctx):
         unfiltered_compile_flags_dict = rctx.attr.unfiltered_compile_flags,
         llvm_version = llvm_version,
     )
-    host_dl_ext = _os_dl_ext(os)
-    host_exec_ext = _os_exec_ext(os)
     host_tools_info = dict([
         pair
         for (key, tool_path, features) in [

@@ -29,7 +29,7 @@ def llvm_repo_impl(rctx):
         "BUILD.bazel",
         Label("//toolchain:BUILD.llvm_repo.tpl"),
         substitutions = {
-            "exec_ext": _os_exec_ext(os),
+            "%{exec_ext}": _os_exec_ext(os),
         },
         executable = False,
     )
