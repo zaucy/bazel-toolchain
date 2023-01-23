@@ -334,7 +334,6 @@ def download_llvm(rctx):
             sha256 = sha256,
             auth = _get_auth(rctx, urls),
         )
-        print(res)
 
         _extract_nsis_exe(
             rctx,
