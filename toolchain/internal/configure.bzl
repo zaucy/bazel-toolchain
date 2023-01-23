@@ -485,7 +485,7 @@ cc_toolchain(
         host_tools_info = host_tools_info,
     )
 
-def _convenience_targets_str(rctx, use_absolute_paths, llvm_dist_rel_path, llvm_dist_label_prefix, host_dl_ext):
+def _convenience_targets_str(rctx, use_absolute_paths, llvm_dist_rel_path, llvm_dist_label_prefix, host_dl_ext, host_exec_ext):
     if use_absolute_paths:
         llvm_dist_label_prefix = ":"
         filenames = []
@@ -493,7 +493,7 @@ def _convenience_targets_str(rctx, use_absolute_paths, llvm_dist_rel_path, llvm_
             filename = "lib/{}.{}".format(libname, host_dl_ext)
             filenames.append(filename)
         for toolname in _aliased_tools:
-            filename = "bin/{}".format(toolname)
+            filename = "bin/{}{}".format(toolname, host_exec_ext)
             filenames.append(filename)
 
         for filename in filenames:
@@ -513,12 +513,13 @@ cc_import(
         template = """
 native_binary(
     name = "{name}",
-    out = "{name}",
-    src = "{{llvm_dist_label_prefix}}bin/{name}",
+    out = "{name}{host_exec_ext}",
+    src = "{{llvm_dist_label_prefix}}bin/{name}{{host_exec_ext}}",
 )""".format(name = name)
         tool_target_strs.append(template)
 
     return "\n".join(lib_target_strs + tool_target_strs).format(
         llvm_dist_label_prefix = llvm_dist_label_prefix,
         host_dl_ext = host_dl_ext,
+        host_exec_ext = host_exec_ext,
     )

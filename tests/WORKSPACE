@@ -127,6 +127,13 @@ llvm_toolchain(
     },
 )
 
+# Windows toolchain was introduced at 15.0.7
+llvm_toolchain(
+    name = "llvm_toolchain_windows",
+    llvm_version = "15.0.7",
+    distribution = "LLVM-15.0.7-win64.exe",
+)
+
 http_archive(
     name = "bazel_skylib",
     sha256 = "74d544d96f4a5bb630d465ca8bbcfe231e3594e5aae57e1edbf17a6eb3ca2506",

@@ -290,6 +290,30 @@ def _get_auth(ctx, urls):
 
     return {}
 
+def _find_7zip(rctx):
+    exe_path = rctx.which("7z.exe")
+
+    if exe_path:
+        return rctx.path(exe_path)
+
+    exe_path = rctx.os.environ["PROGRAMFILES"] + "/7-Zip/7z.exe"
+
+    exe_path = rctx.path(exe_path)
+    if not exe_path.exists:
+        fail("Cannot find 7z.exe in Program Files or PATH")
+
+    return exe_path
+
+def _extract_nsis_exe(rctx, strip_prefix = "", archive = ""):
+    exe_7z = _find_7zip(rctx)
+    rctx.execute([exe_7z, "x", archive])
+
+def _has_exe_urls(urls):
+    for url in urls:
+        if url.endswith(".exe"):
+            return True
+    return False
+
 def download_llvm(rctx):
     urls = []
     update_sha256 = False
@@ -300,12 +324,30 @@ def download_llvm(rctx):
     if not urls:
         urls, sha256, strip_prefix = _distribution_urls(rctx)
 
-    res = rctx.download_and_extract(
-        urls,
-        sha256 = sha256,
-        stripPrefix = strip_prefix,
-        auth = _get_auth(rctx, urls),
-    )
+    res = None
+
+    if _has_exe_urls(urls):
+        exe_filename = urls[0][urls[0].rindex("/") + 1:]
+        res = rctx.download(
+            urls,
+            output = exe_filename,
+            sha256 = sha256,
+            auth = _get_auth(rctx, urls),
+        )
+        print(res)
+
+        _extract_nsis_exe(
+            rctx,
+            archive = exe_filename,
+            strip_prefix = strip_prefix,
+        )
+    else:
+        res = rctx.download_and_extract(
+            urls,
+            sha256 = sha256,
+            stripPrefix = strip_prefix,
+            auth = _get_auth(rctx, urls),
+        )
 
     updated_attrs = _attr_dict(rctx.attr)
     if update_sha256:

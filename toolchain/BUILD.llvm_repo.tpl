@@ -26,9 +26,9 @@ exports_files(glob([
 filegroup(
     name = "clang",
     srcs = [
-        "bin/clang",
-        "bin/clang++",
-        "bin/clang-cpp",
+        "bin/clang{exec_ext}",
+        "bin/clang++{exec_ext}",
+        "bin/clang-cpp{exec_ext}",
     ],
 )
 
@@ -74,63 +74,63 @@ filegroup(
 
 filegroup(
     name = "ar",
-    srcs = ["bin/llvm-ar"],
+    srcs = ["bin/llvm-ar{exec_ext}"],
 )
 
 filegroup(
     name = "as",
     srcs = [
-        "bin/clang",
-        "bin/llvm-as",
+        "bin/clang{exec_ext}",
+        "bin/llvm-as{exec_ext}",
     ],
 )
 
 filegroup(
     name = "nm",
-    srcs = ["bin/llvm-nm"],
+    srcs = ["bin/llvm-nm{exec_ext}"],
 )
 
 filegroup(
     name = "objcopy",
-    srcs = ["bin/llvm-objcopy"],
+    srcs = ["bin/llvm-objcopy{exec_ext}"],
 )
 
 filegroup(
     name = "objdump",
-    srcs = ["bin/llvm-objdump"],
+    srcs = ["bin/llvm-objdump{exec_ext}"],
 )
 
 filegroup(
     name = "profdata",
-    srcs = ["bin/llvm-profdata"],
+    srcs = ["bin/llvm-profdata{exec_ext}"],
 )
 
 filegroup(
     name = "dwp",
-    srcs = ["bin/llvm-dwp"],
+    srcs = ["bin/llvm-dwp{exec_ext}"],
 )
 
 filegroup(
     name = "ranlib",
-    srcs = ["bin/llvm-ranlib"],
+    srcs = ["bin/llvm-ranlib{exec_ext}"],
 )
 
 filegroup(
     name = "readelf",
-    srcs = ["bin/llvm-readelf"],
+    srcs = ["bin/llvm-readelf{exec_ext}"],
 )
 
 filegroup(
     name = "strip",
-    srcs = ["bin/llvm-strip"],
+    srcs = ["bin/llvm-strip{exec_ext}"],
 )
 
 filegroup(
     name = "symbolizer",
-    srcs = ["bin/llvm-symbolizer"],
+    srcs = ["bin/llvm-symbolizer{exec_ext}"],
 )
 
 filegroup(
     name = "clang-tidy",
-    srcs = ["bin/clang-tidy"],
+    srcs = ["bin/clang-tidy{exec_ext}"],
 )

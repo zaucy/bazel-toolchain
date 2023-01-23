@@ -15,6 +15,7 @@
 load(
     "//toolchain/internal:common.bzl",
     _os = "os",
+    _os_exec_ext = "os_exec_ext",
 )
 load(
     "//toolchain/internal:llvm_distributions.bzl",
@@ -23,13 +24,13 @@ load(
 
 def llvm_repo_impl(rctx):
     os = _os(rctx)
-    if os == "windows":
-        rctx.file("BUILD", executable = False)
-        return
 
-    rctx.file(
+    rctx.template(
         "BUILD.bazel",
-        content = rctx.read(Label("//toolchain:BUILD.llvm_repo")),
+        Label("//toolchain:BUILD.llvm_repo.tpl"),
+        substitutions = {
+            "exec_ext": _os_exec_ext(os),
+        },
         executable = False,
     )
 

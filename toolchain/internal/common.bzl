@@ -87,7 +87,7 @@ def os(rctx):
 
 def os_bzl(os):
     # Return the OS string as used in bazel platform constraints.
-    return {"darwin": "osx", "linux": "linux"}[os]
+    return {"darwin": "osx", "linux": "linux", "windows": "windows"}[os]
 
 def arch(rctx):
     arch = rctx.os.arch
@@ -99,6 +99,22 @@ def arch(rctx):
 
 def os_arch_pair(os, arch):
     return "{}-{}".format(os, arch)
+
+def os_exec_ext(os):
+    if os == "windows":
+        return ".exe"
+    else:
+        return ""
+
+def os_dl_ext(os):
+    if os == "windows":
+        return ".dl"
+    elif os == "darwin":
+        return ".dylib"
+    elif os == "linux":
+        return ".so"
+
+    fail("Cannot find dynamic library extension for {}".format(os))
 
 _supported_os_arch = [os_arch_pair(os, arch) for (os, arch) in SUPPORTED_TARGETS]
 
