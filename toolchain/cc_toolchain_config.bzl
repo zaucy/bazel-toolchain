@@ -326,13 +326,18 @@ def cc_toolchain_config(
         else:
             ar_binary = host_tools_info["libtool"]["path"]
 
+    cc_wrapper = wrapper_bin_prefix + "cc_wrapper.sh"
+    if host_os == "windows":
+        # No wrapper on Windows
+        cc_wrapper = tools_path_prefix + "clang.exe"
+
     # The tool names come from [here](https://github.com/bazelbuild/bazel/blob/c7e58e6ce0a78fdaff2d716b4864a5ace8917626/src/main/java/com/google/devtools/build/lib/rules/cpp/CppConfiguration.java#L76-L90):
     # NOTE: Ensure these are listed in toolchain_tools in toolchain/internal/common.bzl.
     tool_paths = {
         "ar": ar_binary,
         "cpp": tools_path_prefix + "clang-cpp",
         "dwp": tools_path_prefix + "llvm-dwp",
-        "gcc": wrapper_bin_prefix + "cc_wrapper.sh",
+        "gcc": cc_wrapper,
         "gcov": tools_path_prefix + "llvm-profdata",
         "ld": tools_path_prefix + "ld.lld" if use_lld else _host_tools.get_and_assert(host_tools_info, "ld"),
         "llvm-cov": tools_path_prefix + "llvm-cov",

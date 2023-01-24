@@ -205,18 +205,19 @@ def llvm_config_impl(rctx):
         },
     )
 
-    # CC wrapper script; see comments near the definition of `wrapper_bin_prefix`.
-    if os == "darwin":
-        cc_wrapper_tpl = "//toolchain:osx_cc_wrapper.sh.tpl"
-    else:
-        cc_wrapper_tpl = "//toolchain:cc_wrapper.sh.tpl"
-    rctx.template(
-        "bin/cc_wrapper.sh",
-        Label(cc_wrapper_tpl),
-        {
-            "%{toolchain_path_prefix}": llvm_dist_path_prefix,
-        },
-    )
+    if os != "windows":
+        # CC wrapper script; see comments near the definition of `wrapper_bin_prefix`.
+        if os == "darwin":
+            cc_wrapper_tpl = "//toolchain:osx_cc_wrapper.sh.tpl"
+        else:
+            cc_wrapper_tpl = "//toolchain:cc_wrapper.sh.tpl"
+        rctx.template(
+            "bin/cc_wrapper.sh",
+            Label(cc_wrapper_tpl),
+            {
+                "%{toolchain_path_prefix}": llvm_dist_path_prefix,
+            },
+        )
 
     # libtool wrapper; used if the host libtool doesn't support arg files:
     rctx.template(

@@ -26,6 +26,7 @@ host_tool_features = struct(
 
 toolchain_tools = [
     "clang-cpp",
+    "clang",
     "ld.lld",
     "llvm-ar",
     "llvm-dwp",

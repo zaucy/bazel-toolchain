@@ -20,6 +20,7 @@ cc_library(
     name = "stdlib",
     srcs = ["stdlib.cc"],
     hdrs = ["stdlib.h"],
+    features = ["-pic"],
 )
 
 # We want to emulate the behavior of cc_binary but be able to run the target as
