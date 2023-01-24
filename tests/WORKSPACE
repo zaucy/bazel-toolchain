@@ -43,7 +43,7 @@ llvm_toolchain(
         "": "",
         "darwin-aarch64": "867c6afd41158c132ef05a8f1ddaecf476a26b91c85def8e124414f9a9ba188d",
         "darwin-x86_64": "d16b6d536364c5bec6583d12dd7e6cf841b9f508c4430d9ee886726bd9983f1c",
-        "windows-x86_64": "",
+        "windows-x86_64": "5428cb72acf63ce3bc4328e546a36674c9736ec040ecc176d362201c6548e6a8",
     },
     strip_prefix = {
         "": "clang+llvm-15.0.7-x86_64-linux-gnu-ubuntu-18.04",
