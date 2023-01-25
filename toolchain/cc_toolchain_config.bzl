@@ -29,6 +29,52 @@ load(
 def _fmt_flags(flags, toolchain_path_prefix):
     return [f.format(toolchain_path_prefix = toolchain_path_prefix) for f in flags]
 
+_CC_TOOLCHAIN_IDENTIFIERS = {
+}
+
+# `target_*` attributes that get passed straight through to
+# `create_cc_toolchain_config_info`.
+# TODO: What do these values mean, and are they actually all correct?
+def _create_cc_toolchain_config_target_args(os_arch_pair):
+    # ordered as:
+    #  - target_system_name
+    #  - target_cpu
+    #  - target_libc
+    available_args = {
+        "darwin-x86_64": (
+            "x86_64-apple-macosx",
+            "darwin",
+            "macosx",
+        ),
+        "darwin-aarch64": (
+            "aarch64-apple-macosx",
+            "darwin",
+            "macosx",
+        ),
+        "linux-aarch64": (
+            "aarch64-unknown-linux-gnu",
+            "aarch64",
+            "glibc_unknown",
+        ),
+        "linux-x86_64": (
+            "x86_64-unknown-linux-gnu",
+            "k8",
+            "glibc_unknown",
+        ),
+        "windows-x86_64": (
+            "x86_64-unknown-windows",
+            "windows",
+            "windows",
+        ),
+        "wasi-wasm32": (
+            "wasm32-wasi",
+            "wasm32",
+            "wasi",
+        ),
+    }
+
+    return available_args[os_arch_pair]
+
 # Macro for calling cc_toolchain_config from @bazel_tools with setting the
 # right paths and flags for the tools.
 def cc_toolchain_config(
@@ -47,65 +93,22 @@ def cc_toolchain_config(
     target_os_arch_key = _os_arch_pair(target_os, target_arch)
     _check_os_arch_keys([host_os_arch_key, target_os_arch_key])
 
-    # A bunch of variables that get passed straight through to
-    # `create_cc_toolchain_config_info`.
-    # TODO: What do these values mean, and are they actually all correct?
-    host_system_name = host_arch
+    # The compiler version string (e.g. "gcc-4.1.1").
+    compiler = "clang-{}".format(llvm_version)
+
+    # The unique identifier of the toolchain within the crosstool release. It
+    # must be possible to use this as a directory name in a path.
+    toolchain_identifier = "clang-{}_{}-{}".format(llvm_version, host_os, host_arch)
+
     (
-        toolchain_identifier,
         target_system_name,
         target_cpu,
         target_libc,
-        compiler,
-        abi_version,
-        abi_libc_version,
-    ) = {
-        "darwin-x86_64": (
-            "clang-x86_64-darwin",
-            "x86_64-apple-macosx",
-            "darwin",
-            "macosx",
-            "clang",
-            "darwin_x86_64",
-            "darwin_x86_64",
-        ),
-        "darwin-aarch64": (
-            "clang-aarch64-darwin",
-            "aarch64-apple-macosx",
-            "darwin",
-            "macosx",
-            "clang",
-            "darwin_aarch64",
-            "darwin_aarch64",
-        ),
-        "linux-aarch64": (
-            "clang-aarch64-linux",
-            "aarch64-unknown-linux-gnu",
-            "aarch64",
-            "glibc_unknown",
-            "clang",
-            "clang",
-            "glibc_unknown",
-        ),
-        "linux-x86_64": (
-            "clang-x86_64-linux",
-            "x86_64-unknown-linux-gnu",
-            "k8",
-            "glibc_unknown",
-            "clang",
-            "clang",
-            "glibc_unknown",
-        ),
-        "windows-x86_64": (
-            "clang-x86_64-windows",
-            "x86_64-unknown-windows",
-            "windows",
-            "windows",
-            "clang",
-            "clang",
-            "windows",
-        ),
-    }[target_os_arch_key]
+    ) = _create_cc_toolchain_config_target_args(target_os_arch_key)
+
+    # Abi attributes are optional
+    abi_version = ""
+    abi_libc_version = ""
 
     # Unfiltered compiler flags; these are placed at the end of the command
     # line, so take precendence over any user supplied flags through --copts or
@@ -190,7 +193,15 @@ def cc_toolchain_config(
     stdlib = compiler_configuration["stdlib"]
     if stdlib == "builtin-libc++" and is_xcompile:
         stdlib = "stdc++"
-    if stdlib == "builtin-libc++":
+
+    if stdlib == "builtin-libc++" and target_os == "windows":
+        cxx_flags = [
+            "-std=" + cxx_standard,
+            # no -stdlib for windows
+        ]
+    elif target_os == "windows":
+        fail("Configured stdlib on Windows it not supported")
+    elif stdlib == "builtin-libc++":
         cxx_flags = [
             "-std=" + cxx_standard,
             "-stdlib=libc++",
@@ -288,7 +299,7 @@ def cc_toolchain_config(
     sysroot_prefix = ""
     if sysroot_path:
         sysroot_prefix = "%sysroot%"
-    if target_os == "linux" or target_os == "windows":
+    if target_os == "linux":
         cxx_builtin_include_directories.extend([
             sysroot_prefix + "/include",
             sysroot_prefix + "/usr/include",
@@ -299,8 +310,6 @@ def cc_toolchain_config(
             sysroot_prefix + "/usr/include",
             sysroot_prefix + "/System/Library/Frameworks",
         ])
-    else:
-        fail("Unreachable")
 
     cxx_builtin_include_directories.extend(compiler_configuration["additional_include_dirs"])
 
@@ -384,7 +393,7 @@ def cc_toolchain_config(
         cpu = target_cpu,
         compiler = compiler,
         toolchain_identifier = toolchain_identifier,
-        host_system_name = host_system_name,
+        host_system_name = "",  # this value is ignored
         target_system_name = target_system_name,
         target_libc = target_libc,
         abi_version = abi_version,

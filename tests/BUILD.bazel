@@ -16,6 +16,13 @@ load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load(":transitions.bzl", "dwp_file")
 
+cc_binary(
+    name = "add",
+    srcs = ["add.cc"],
+    linkshared = True,
+    features = ["-pic"],
+)
+
 cc_library(
     name = "stdlib",
     srcs = ["stdlib.cc"],
@@ -30,6 +37,7 @@ cc_test(
     srcs = ["stdlib_test.cc"],
     linkstatic = True,
     deps = [":stdlib"],
+    features = ["-pic"],
 )
 
 # We want to test a `.stripped` target to make sure `llvm-strip` can be called.
@@ -39,6 +47,7 @@ cc_binary(
     name = "stdlib_bin",
     srcs = ["stdlib_test.cc"],
     deps = [":stdlib"],
+    features = ["-pic"],
 )
 
 build_test(

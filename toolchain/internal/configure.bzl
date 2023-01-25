@@ -263,6 +263,17 @@ def _cc_toolchains_str(
             toolchain_name = "@{}//:cc-toolchain-{}".format(workspace_name, suffix)
             toolchain_names.append(toolchain_name)
 
+    # All execution platforms support WASM and WASI
+    # toolchain_names.append("@{}//:cc-toolchain-{}".format(workspace_name, "wasm32-wasi"))
+    # cc_toolchains_str = cc_toolchains_str + _cc_toolchain_str(
+    #     "wasm32-wasi",
+    #     "wasi",
+    #     "wasm32",
+    #     toolchain_info,
+    #     use_absolute_paths_llvm,
+    #     host_tools_info,
+    # )
+
     sep = ",\n" + " " * 8  # 2 tabs with tabstop=4.
     toolchain_labels_str = sep.join(["\"{}\"".format(d) for d in toolchain_names])
     return cc_toolchains_str, toolchain_labels_str
@@ -299,6 +310,9 @@ def _cc_toolchain_str(
         if host_os == target_os and host_arch == target_arch:
             # For darwin -> darwin, we can use the macOS SDK path.
             sysroot_path = toolchain_info.default_sysroot_path
+        elif target_arch == "wasm32":
+            # wasm32 does not need a sysroot
+            pass
         else:
             # We are trying to cross-compile without a sysroot, let's bail.
             # TODO: Are there situations where we can continue?

@@ -18,6 +18,7 @@ SUPPORTED_TARGETS = [
     ("darwin", "x86_64"),
     ("darwin", "aarch64"),
     ("windows", "x86_64"),
+    ("wasi", "wasm32"),
 ]
 
 host_tool_features = struct(
@@ -94,7 +95,7 @@ def os(rctx):
 
 def os_bzl(os):
     # Return the OS string as used in bazel platform constraints.
-    return {"darwin": "osx", "linux": "linux", "windows": "windows"}[os]
+    return {"darwin": "osx", "linux": "linux", "windows": "windows", "wasi": "wasi"}[os]
 
 def arch(rctx):
     arch = rctx.os.arch
