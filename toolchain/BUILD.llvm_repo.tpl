@@ -35,7 +35,7 @@ filegroup(
 filegroup(
     name = "ld",
     srcs = [
-        "bin/ld.lld",
+        "bin/ld.lld%{exec_ext}",
     ],
 )
 
